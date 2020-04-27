@@ -3,12 +3,19 @@
     <main>
       <!-- 上传区域 -->
       <div class="upload-area">
-        <el-button type="primary" round class="el-icon-upload" >点击上传文件</el-button>
+        <video id="uploadvideo" v-bind:src="filepath" controls="controls" v-if="isShowUploadVideo"></video>
+        <el-upload v-if="!isShowUploadVideo" action="" :on-change="upload" :auto-upload="false">
+          <el-button type="primary" round class="el-icon-upload" >点击上传文件</el-button>
+        </el-upload>
       </div>
       <!-- 输出结果区域 -->
       <div class="show-area">
       </div>
     </main>
+    <div v-if="isShowUploadVideo">
+      <el-slider class="progress"  v-model="videoInfo.precent" show-input input-size="mini"></el-slider>
+      <el-button type="primary" round @click="handleProgress()">确认采样</el-button>
+    </div>
     <!-- 参数区域 -->
     <div class="input-data">
       <!-- 预设按钮 -->
@@ -65,7 +72,7 @@
     </div>
     <!-- 保存预设弹窗 -->
     <el-dialog title="保存预设" :visible.sync="saveDialogVisible" width="30%" :before-close="handleClose">
-      <el-input v-model="preinput" placeholder="请输入预设名称"></el-input>
+      <el-input v-model="preName" placeholder="请输入预设名称"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="saveDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="saveData()">确 定</el-button>
@@ -86,6 +93,7 @@
 </template>
 
 <script>
+  import {ipcRenderer} from 'electron'
   export default {
     name: 'index-page',
     data () {
@@ -106,9 +114,10 @@
 
         // 预设下标
         preIndex: 0,
-
         // 预设名字输入
-        preinput: '',
+        preName: '',
+        // 预设个数统计
+        count: 0,
 
         // 是否显示预设弹窗
         saveDialogVisible: false,
@@ -118,7 +127,19 @@
         preList: [],
 
         // 预设名字
-        value: ''
+        value: '',
+
+        // 是否显示上传视频
+        isShowUploadVideo: false,
+        // 文件路径
+        filepath: '',
+
+        // 当前视频数据
+        videoInfo: {
+          duration: 0,
+          currentTime: 0,
+          precent: 0
+        }
       }
     },
     methods: {
@@ -133,32 +154,75 @@
           .catch(_ => {})
       },
 
+      loadpreList () {
+        let myStorage = window.localStorage
+        let getList = JSON.parse(myStorage.getItem('preList'))
+        console.log('getlist')
+        console.log(getList)
+        this.preList = getList
+        if (myStorage.getItem('count') != null) {
+          this.count = myStorage.getItem('count')
+        }
+      },
+
       // 保存预设函数
       saveData () {
         let myStorage = window.localStorage
+        console.log('myStorage')
         console.log(myStorage)
+        console.log('this.currentData')
         console.log(this.currentData)
-        let preDataToJson = JSON.stringify(this.currentData)
-        console.log(preDataToJson)
-        myStorage.setItem(this.preinput, preDataToJson)
-        this.preList.push({value: this.preIndex, label: this.preinput})
-        console.log(this.preList)
+        this.preIndex = this.count
+        this.preList.push({value: this.preIndex, label: this.preName, predata: this.currentData})
+        let preListToJson = JSON.stringify(this.preList)
+        console.log('preListToJson')
+        console.log(preListToJson)
+        myStorage.setItem('preList', preListToJson)
         this.saveDialogVisible = false
+        this.count++
+        myStorage.setItem('count', this.count)
       },
 
       // 导入预设函数
       importData () {
         let myStorage = window.localStorage
-        console.log(myStorage.getItem(this.value))
-        let getData = JSON.parse(myStorage.getItem(this.value))
-        let key
-        for (key in getData) {
-          this.currentData[key] = getData[key]
+        console.log(myStorage.getItem('preList'))
+        let getData = JSON.parse(myStorage.getItem('preList'))
+        console.log('getdata')
+        console.log(getData)
+        this.preList = getData
+        console.log('this.preList')
+        console.log(this.preList)
+        console.log(this.value)
+        for (let index = 0; index < getData.length; index++) {
+          if (getData[index].value === this.value) {
+            for (let key in this.currentData) {
+              this.currentData[key] = getData[index].predata[key]
+            }
+          }
         }
         this.importDialogVisible = false
+      },
+      upload (file) {
+        ipcRenderer.send('on-upload-video', file.raw.path)
+        this.isShowUploadVideo = true
+        let url = URL.createObjectURL(file.raw)
+        this.filepath = url
+      },
+      handleProgress () {
+        let uploadvideo = document.getElementById('uploadvideo')
+        this.video.currentTime = uploadvideo.currentTime
+        this.videoInfo.duration = uploadvideo.duration
       }
+    },
+    computed: {
+      progress () {
+        this.videoInfo.precent = ((this.videoInfo.currentTime / (this.videoInfo.duration || 1)) * 100).toFixed(1)
+      }
+    },
+    created () {
+      this.loadpreList()
     }
-
   }
 </script>
 
@@ -182,24 +246,23 @@
 
   main{
     margin: 20px;
-    height: 40vh;
+    height: 50vh;
     display: flex;
     justify-content: center;
   }
 
   .upload-area{
     width: 48%;
-    height: 40vh;
-    line-height: 40vh;
+    height: 50vh;
+    line-height: 50vh;
     text-align: center;
     border: 5px dashed transparent;
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
-
   .show-area{
     width: 47%;
-    height: 40vh;
+    height: 50vh;
     line-height: 50vh;
     text-align: center;
     border: 5px dashed transparent;
@@ -207,7 +270,10 @@
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
-
+  video {
+    width: 100%;
+    height: 100%
+  }
   .pre{
     margin:10px 45px;
     display: flex;

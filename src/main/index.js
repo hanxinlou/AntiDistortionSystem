@@ -1,7 +1,7 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
-
+import { app, BrowserWindow, ipcMain } from 'electron'
+var nodeConsole = require('console')
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -28,6 +28,16 @@ function createWindow () {
   })
 
   mainWindow.loadURL(winURL)
+
+  // Open dev tools initially when in development mode
+  // if (process.env.NODE_ENV === "development") {
+  //   mainWindow.webContents.on("did-frame-finish-load", () => {
+  //     mainWindow.webContents.once("devtools-opened", () => {
+  //       mainWindow.focus()
+  //     })
+  //     mainWindow.webContents.openDevTools()
+  //   })
+  // }
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -67,3 +77,9 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+
+var myConsole = new nodeConsole.Console(process.stdout, process.stderr)
+myConsole.log('asdsadasd')
+ipcMain.on('on-upload-video', (e, f) => {
+  console.log(f)
+})
