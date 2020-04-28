@@ -1,6 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain } from 'electron'
+import fs from 'fs'
+const { execFile } = require('child_process')
 var nodeConsole = require('console')
 /**
  * Set `__static` path to static files in production
@@ -83,3 +85,27 @@ myConsole.log('asdsadasd')
 ipcMain.on('on-upload-video', (e, f) => {
   console.log(f)
 })
+ipcMain.on('transData', (e, f) => {
+  myConsole.log(f)
+  execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', 'd:/penglai.jpg', '--ouput', './temp', '--cx', f.preData.valueX, '--cy', f.preData.valueY, '--k1', f.preData.parameter1, '--k2', f.preData.parameter2], (err, stdout, stderr) => {
+    if (err) {
+      myConsole.log(err)
+      return
+    }
+    myConsole.log(`stdout: ${stdout}`)
+  })
+})
+
+// 检测文件或者文件夹存在 nodeJS
+function fsExistsSync (path) {
+  try {
+    fs.accessSync(path, fs.F_OK)
+  } catch (e) {
+    return false
+  }
+  return true
+}
+
+if (!fsExistsSync('temp')) {
+  fs.mkdir('temp')
+}

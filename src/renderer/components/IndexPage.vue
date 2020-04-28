@@ -4,7 +4,7 @@
       <!-- 上传区域 -->
       <div class="upload-area">
         <video id="uploadVideo" controls="controls" 
-          v-bind:src="filepath" v-if="isShowUploadVideo"></video>
+          v-bind:src="filePath" v-if="isShowUploadVideo"></video>
         <el-upload action="" 
           v-if="!isShowUploadVideo" :on-change="upload" :auto-upload="false">
           <el-button type="primary" round class="el-icon-upload">点击上传文件</el-button>
@@ -86,7 +86,7 @@
     </div>
     <!-- 开始停止按钮 -->
     <div class="button-area">
-      <el-button type="primary" round class="el-icon-video-play">开始</el-button>
+      <el-button type="primary" round class="el-icon-video-play" @click="transData()">开始</el-button>
       <el-button type="primary" round class="el-icon-video-pause">停止</el-button>
     </div>
     <!-- 保存预设弹窗 -->
@@ -149,7 +149,9 @@
         // 是否显示上传视频
         isShowUploadVideo: false,
         // 文件路径
-        filepath: '',
+        filePath: '',
+        // 本地文件路径
+        localPath: '',
         // 当前视频数据
         videoInfo: {
           duration: 0,
@@ -219,18 +221,14 @@
         this.importDialogVisible = false
       },
       upload (file) {
+        this.localPath = file.raw.path
         ipcRenderer.send('on-upload-video', file.raw.path)
         this.isShowUploadVideo = true
         let url = URL.createObjectURL(file.raw)
-        this.filepath = url
-        console.log('uploadsuccess')
-        console.log('handleVideoInfo')
-
+        this.filePath = url
         let t = setInterval(() => {
           let uploadVideo = document.getElementById('uploadVideo')
           if (uploadVideo != null) {
-            console.log(uploadVideo)
-            console.log(uploadVideo.duration)
             this.videoInfo.currentTime = uploadVideo.currentTime
             this.videoInfo.duration = uploadVideo.duration
             clearInterval(t)
@@ -242,13 +240,18 @@
       // },
       // 处理确认采样进度条变化与视频进度条统一
       handleTimeUpdate () {
-        console.log('handleTimeUpdate')
         let uploadVideo = document.getElementById('uploadVideo')
         uploadVideo.currentTime = this.videoInfo.precent * uploadVideo.duration / 100
       },
       checkSample () {
         this.sampleTimePoint = this.videoInfo.precent / 100
-        console.log(this.sampleTimePoint)
+      },
+      transData () {
+        ipcRenderer.send('transData', {
+          filePath: this.localPath,
+          sampleTimePoint: this.sampleTimePoint,
+          preData: this.currentData
+        })
       }
     },
     created () {
