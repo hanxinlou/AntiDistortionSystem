@@ -1,13 +1,18 @@
 <template>
   <div id="app">
+    <div class="menu-container">
+        <Menu />
+    </div>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'anti-distortion'
-  }
+import Menu from '@/components/Menu.vue'
+export default {
+  name: 'anti-distortion',
+  components: { Menu }
+}
 </script>
 
 <style>

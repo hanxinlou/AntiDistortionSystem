@@ -6,9 +6,14 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      path: '/handleVideo',
+      name: 'HandleVideo',
+      component: require('@/components/HandleVideo').default
+    },
+    {
       path: '/',
-      name: 'index-page',
-      component: require('@/components/IndexPage').default
+      name: 'Distortion',
+      component: require('@/components/Distortion').default
     },
     {
       path: '*',
