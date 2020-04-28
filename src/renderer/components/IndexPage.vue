@@ -3,65 +3,84 @@
     <main>
       <!-- 上传区域 -->
       <div class="upload-area">
-        <video id="uploadvideo" v-bind:src="filepath" controls="controls" v-if="isShowUploadVideo"></video>
-        <el-upload v-if="!isShowUploadVideo" action="" :on-change="upload" :auto-upload="false">
-          <el-button type="primary" round class="el-icon-upload" >点击上传文件</el-button>
+        <video id="uploadVideo" controls="controls" 
+          v-bind:src="filepath" v-if="isShowUploadVideo"></video>
+        <el-upload action="" 
+          v-if="!isShowUploadVideo" :on-change="upload" :auto-upload="false">
+          <el-button type="primary" round class="el-icon-upload">点击上传文件</el-button>
         </el-upload>
       </div>
       <!-- 输出结果区域 -->
       <div class="show-area">
       </div>
     </main>
-    <div v-if="isShowUploadVideo">
-      <el-slider class="progress"  v-model="videoInfo.precent" show-input input-size="mini"></el-slider>
-      <el-button type="primary" round @click="handleProgress()">确认采样</el-button>
+    <!-- 确认采样 -->
+    <div class="sampling" v-if="isShowUploadVideo">
+      <div class="data1">视频进度条</div>
+      <el-slider class="value2"
+        v-model="videoInfo.precent" @change="handleTimeUpdate"></el-slider>
+      <el-button class="checkbtn" type="primary" round size="mini"
+        @click="checkSample()">确认采样</el-button>
     </div>
     <!-- 参数区域 -->
     <div class="input-data">
       <!-- 预设按钮 -->
       <div class="pre">
-        <el-button type="primary" round class="el-icon-folder" size="mini" @click="saveDialogVisible = true">保存预设</el-button>
-        <el-button type="primary" round class="el-icon-folder-opened" size="mini" @click="importDialogVisible = true">导入预设</el-button>
+        <el-button type="primary" round class="el-icon-folder" size="mini" 
+          @click="saveDialogVisible = true">保存预设</el-button>
+        <el-button type="primary" round class="el-icon-folder-opened" size="mini" 
+          @click="importDialogVisible = true">导入预设</el-button>
       </div>
       <!-- 畸变参数 -->
       <div class="parameter-area1">
         <div class="data1">畸变参数 k1</div>
-        <el-slider class="value1" v-model="currentData.parameter1" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.parameter1"></el-slider>
         <div class="data1">畸变参数 k2</div>
-        <el-slider class="value1" v-model="currentData.parameter2" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.parameter2"></el-slider>
       </div>
       <!-- 畸变中心坐标 -->
       <div class="parameter-area1">
         <div class="data1">畸变中心坐标X</div>
-        <el-slider class="value1" v-model="currentData.valueX" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.valueX"></el-slider>
         <div class="data1">畸变中心坐标Y</div>
-        <el-slider class="value1" v-model="currentData.valueY" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.valueY"></el-slider>
       </div>
       <!-- 遗传变异交叉概率 -->
       <div class="parameter-area1">
         <div class="data1">遗传的变异概率</div>
-        <el-slider class="value1" v-model="currentData.probability1" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.probability1"></el-slider>
         <div class="data1">遗传的交叉概率</div>
-        <el-slider class="value1" v-model="currentData.probability2" show-input input-size="mini"></el-slider>
+        <el-slider class="value1" show-input input-size="mini"
+          v-model="currentData.probability2"></el-slider>
       </div>
       <!-- 模拟退火算法优化 -->
       <div class="is-population-area">
         <div class="data2">是否利用模拟退火算法来优化种群选择</div>
-        <el-switch class="is-population-data" v-model="currentData.isPopulation" active-color="#409eff" inactive-color="#dcdfe6"></el-switch>
+        <el-switch class="is-population-data" 
+          active-color="#409eff" inactive-color="#dcdfe6"
+          v-model="currentData.isPopulation"></el-switch>
       </div>
       <!-- 退火算法参数调整 -->
       <div v-if="currentData.isPopulation" >
         <div class="parameter-area2">
           <div class="data1">初始温度</div>
-          <el-slider class="value2" v-model="currentData.startTemperature" show-input input-size="mini"></el-slider>
+          <el-slider class="value2" show-input input-size="mini"
+            v-model="currentData.startTemperature"></el-slider>
         </div>
         <div class="parameter-area2">
           <div class="data1">终止温度</div>
-          <el-slider class="value2" v-model="currentData.endTemperature" show-input input-size="mini"></el-slider>
+          <el-slider class="value2" show-input input-size="mini"
+            v-model="currentData.endTemperature"></el-slider>
         </div>
         <div class="parameter-area2">
           <div class="data1">降温速度</div>
-          <el-slider class="value2" v-model="currentData.coolingRate" show-input input-size="mini"></el-slider>
+          <el-slider class="value2" show-input input-size="mini"
+            v-model="currentData.coolingRate"></el-slider>
         </div>
       </div>
     </div>
@@ -71,7 +90,8 @@
       <el-button type="primary" round class="el-icon-video-pause">停止</el-button>
     </div>
     <!-- 保存预设弹窗 -->
-    <el-dialog title="保存预设" :visible.sync="saveDialogVisible" width="30%" :before-close="handleClose">
+    <el-dialog title="保存预设" width="30%" 
+      :visible.sync="saveDialogVisible" :before-close="handleClose">
       <el-input v-model="preName" placeholder="请输入预设名称"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="saveDialogVisible = false">取 消</el-button>
@@ -79,9 +99,11 @@
       </span>
     </el-dialog>
     <!-- 导入预设弹窗 -->
-    <el-dialog title="导入预设" :visible.sync="importDialogVisible" width="30%" :before-close="handleClose">
+    <el-dialog title="导入预设" width="30%" 
+      :visible.sync="importDialogVisible" :before-close="handleClose">
       <el-select v-model="value" placeholder="请选择">
-        <el-option v-for="item in preList" :key="item.value" :label="item.label" :value="item.value">
+        <el-option v-for="item in preList" 
+          :key="item.value" :label="item.label" :value="item.value">
         </el-option>
       </el-select>
       <span slot="footer" class="dialog-footer">
@@ -111,35 +133,31 @@
           endTemperature: 0,
           coolingRate: 0
         },
-
         // 预设下标
         preIndex: 0,
         // 预设名字输入
         preName: '',
         // 预设个数统计
         count: 0,
-
         // 是否显示预设弹窗
         saveDialogVisible: false,
         importDialogVisible: false,
-
         // 预设选择框数据列表
         preList: [],
-
         // 预设名字
         value: '',
-
         // 是否显示上传视频
         isShowUploadVideo: false,
         // 文件路径
         filepath: '',
-
         // 当前视频数据
         videoInfo: {
           duration: 0,
           currentTime: 0,
           precent: 0
-        }
+        },
+        // 采样时间点百分比
+        sampleTimePoint: 0
       }
     },
     methods: {
@@ -153,7 +171,6 @@
           })
           .catch(_ => {})
       },
-
       loadpreList () {
         let myStorage = window.localStorage
         let getList = JSON.parse(myStorage.getItem('preList'))
@@ -164,7 +181,6 @@
           this.count = myStorage.getItem('count')
         }
       },
-
       // 保存预设函数
       saveData () {
         let myStorage = window.localStorage
@@ -182,7 +198,6 @@
         this.count++
         myStorage.setItem('count', this.count)
       },
-
       // 导入预设函数
       importData () {
         let myStorage = window.localStorage
@@ -208,16 +223,32 @@
         this.isShowUploadVideo = true
         let url = URL.createObjectURL(file.raw)
         this.filepath = url
+        console.log('uploadsuccess')
+        console.log('handleVideoInfo')
+
+        let t = setInterval(() => {
+          let uploadVideo = document.getElementById('uploadVideo')
+          if (uploadVideo != null) {
+            console.log(uploadVideo)
+            console.log(uploadVideo.duration)
+            this.videoInfo.currentTime = uploadVideo.currentTime
+            this.videoInfo.duration = uploadVideo.duration
+            clearInterval(t)
+          }
+        }, 500)
       },
-      handleProgress () {
-        let uploadvideo = document.getElementById('uploadvideo')
-        this.video.currentTime = uploadvideo.currentTime
-        this.videoInfo.duration = uploadvideo.duration
-      }
-    },
-    computed: {
-      progress () {
-        this.videoInfo.precent = ((this.videoInfo.currentTime / (this.videoInfo.duration || 1)) * 100).toFixed(1)
+      // 处理确认采样进度条
+      // handleVideoInfo () {
+      // },
+      // 处理确认采样进度条变化与视频进度条统一
+      handleTimeUpdate () {
+        console.log('handleTimeUpdate')
+        let uploadVideo = document.getElementById('uploadVideo')
+        uploadVideo.currentTime = this.videoInfo.precent * uploadVideo.duration / 100
+      },
+      checkSample () {
+        this.sampleTimePoint = this.videoInfo.precent / 100
+        console.log(this.sampleTimePoint)
       }
     },
     created () {
@@ -274,10 +305,19 @@
     width: 100%;
     height: 100%
   }
-  .pre{
-    margin:10px 45px;
+  .sampling {
+    margin:10px 30px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
+  }
+  .checkbtn{
+    height: 28px;
+    margin: 5px 45px;
+  }
+  .pre{
+    margin:10px 60px;
+    display: flex;
+    justify-content: flex-start;
   }
 
   .parameter-area1 {
