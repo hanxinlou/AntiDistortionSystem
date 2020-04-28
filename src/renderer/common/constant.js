@@ -3,7 +3,7 @@ export const menuList = [
   {
     title: '畸变研究',
     icon: 'el-icon-search',
-    path: '/'
+    path: '/distortion'
   },
   {
     title: '视频处理',

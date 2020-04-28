@@ -6,15 +6,24 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/handleVideo',
-      name: 'HandleVideo',
-      component: require('@/components/HandleVideo').default
-    },
-    {
       path: '/',
       name: 'Distortion',
-      component: require('@/components/Distortion').default
+      component: () => import('@/components/Distortion.vue')
+      // component: require('@/components/Distortion').default
     },
+    {
+      path: '/distortion',
+      name: 'Distortion',
+      component: () => import('@/components/Distortion.vue')
+      // component: require('@/components/Distortion').default
+    },
+    {
+      path: '/handleVideo',
+      name: 'HandleVideo',
+      component: () => import('@/components/HandleVideo.vue')
+      // component: require('@/components/HandleVideo').default
+    },
+    // 重定向
     {
       path: '*',
       redirect: '/'
