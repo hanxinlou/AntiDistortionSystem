@@ -86,7 +86,7 @@
     </div>
     <!-- 开始停止按钮 -->
     <div class="button-area">
-      <el-button type="primary" round class="el-icon-video-play" @click="transData()">开始</el-button>
+      <el-button type="primary" round class="el-icon-video-play" @click="transVideoData()">开始</el-button>
       <el-button type="primary" round class="el-icon-video-pause">停止</el-button>
     </div>
     <!-- 保存预设弹窗 -->
@@ -232,7 +232,7 @@
       checkSample () {
         this.sampleTimePoint = this.videoInfo.precent / 100
       },
-      transData () {
+      transVideoData () {
         ipcRenderer.send('transVideoData', {
           filePath: this.localPath,
           sampleTimePoint: this.sampleTimePoint,

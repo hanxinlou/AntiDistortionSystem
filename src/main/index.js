@@ -98,6 +98,16 @@ ipcMain.on('transVideoData', (e, f) => {
     myConsole.log(`stdout: ${stdout}`)
   })
 })
+ipcMain.on('transImgData', (e, f) => {
+  myConsole.log(f)
+  // execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', 'd:/penglai.jpg', '--ouput', './temp', '--cx', f.preData.valueX, '--cy', f.preData.valueY, '--k1', f.preData.parameter1, '--k2', f.preData.parameter2], (err, stdout, stderr) => {
+  //   if (err) {
+  //     myConsole.log(err)
+  //     return
+  //   }
+  //   myConsole.log(`stdout: ${stdout}`)
+  // })
+})
 
 // 检测文件或者文件夹存在 nodeJS
 function fsExistsSync (path) {
