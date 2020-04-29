@@ -83,9 +83,12 @@ app.on('ready', () => {
 var myConsole = new nodeConsole.Console(process.stdout, process.stderr)
 myConsole.log('asdsadasd')
 ipcMain.on('on-upload-video', (e, f) => {
-  console.log(f)
+  myConsole.log(f)
 })
-ipcMain.on('transData', (e, f) => {
+ipcMain.on('on-upload-img', (e, f) => {
+  myConsole.log(f)
+})
+ipcMain.on('transVideoData', (e, f) => {
   myConsole.log(f)
   execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', 'd:/penglai.jpg', '--ouput', './temp', '--cx', f.preData.valueX, '--cy', f.preData.valueY, '--k1', f.preData.parameter1, '--k2', f.preData.parameter2], (err, stdout, stderr) => {
     if (err) {

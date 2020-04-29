@@ -1,5 +1,5 @@
 <template>
-  <div id="indexpage"> 
+  <div id="handleVideo"> 
     <main>
       <!-- 上传区域 -->
       <div class="upload-area">
@@ -117,7 +117,7 @@
 <script>
   import {ipcRenderer} from 'electron'
   export default {
-    name: 'index-page',
+    name: 'HandleVideo',
     data () {
       return {
         // 当前参数
@@ -176,8 +176,6 @@
       loadpreList () {
         let myStorage = window.localStorage
         let getList = JSON.parse(myStorage.getItem('preList'))
-        console.log('getlist')
-        console.log(getList)
         this.preList = getList
         if (myStorage.getItem('count') != null) {
           this.count = myStorage.getItem('count')
@@ -186,15 +184,9 @@
       // 保存预设函数
       saveData () {
         let myStorage = window.localStorage
-        console.log('myStorage')
-        console.log(myStorage)
-        console.log('this.currentData')
-        console.log(this.currentData)
         this.preIndex = this.count
         this.preList.push({value: this.preIndex, label: this.preName, predata: this.currentData})
         let preListToJson = JSON.stringify(this.preList)
-        console.log('preListToJson')
-        console.log(preListToJson)
         myStorage.setItem('preList', preListToJson)
         this.saveDialogVisible = false
         this.count++
@@ -203,14 +195,8 @@
       // 导入预设函数
       importData () {
         let myStorage = window.localStorage
-        console.log(myStorage.getItem('preList'))
         let getData = JSON.parse(myStorage.getItem('preList'))
-        console.log('getdata')
-        console.log(getData)
         this.preList = getData
-        console.log('this.preList')
-        console.log(this.preList)
-        console.log(this.value)
         for (let index = 0; index < getData.length; index++) {
           if (getData[index].value === this.value) {
             for (let key in this.currentData) {
@@ -247,7 +233,7 @@
         this.sampleTimePoint = this.videoInfo.precent / 100
       },
       transData () {
-        ipcRenderer.send('transData', {
+        ipcRenderer.send('transVideoData', {
           filePath: this.localPath,
           sampleTimePoint: this.sampleTimePoint,
           preData: this.currentData
@@ -272,7 +258,7 @@
 
   body { font-family: 'Source Sans Pro', sans-serif; }
 
-  #indexpage {
+  #handleVideo {
     background: white;
     height: 100vh;
     width: 100vw;
