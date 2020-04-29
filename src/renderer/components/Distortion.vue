@@ -13,6 +13,13 @@
     <div class="show-area">
     </div>
   </main>
+  <!-- 重新上传图片 -->
+  <div class="re-uploadImg">
+    <el-upload action="" :show-file-list=false
+      v-if="isShowUploadImg" :on-change="upload" :auto-upload="false">
+      <el-button type="primary" round class="el-icon-upload" size="mini">重新上传图片</el-button>
+    </el-upload>
+  </div>
   <!-- 参数区域 -->
   <div class="input-data">
     <!-- 畸变参数 -->
@@ -47,13 +54,15 @@ export default {
   methods: {
     upload (file) {
       this.localPath = file.raw.path
-      ipcRenderer.send('on-upload-img', file.raw.path)
+      // ipcRenderer.send('on-upload-img', file.raw.path)
       this.isShowUploadImg = true
       let url = URL.createObjectURL(file.raw)
       this.filePath = url
+      this.changeParameter()
     },
     changeParameter () {
       ipcRenderer.send('transImgData', {
+        filepath: this.localPath,
         K1: this.parameter1,
         K2: this.parameter2
       })
@@ -111,6 +120,9 @@ export default {
     border-left-width: 0;
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
+  }
+  .re-uploadImg{
+    margin:10px 500px 10px 290px
   }
   .parameter-area1 {
     margin: 10px 30px;

@@ -14,6 +14,13 @@
       <div class="show-area">
       </div>
     </main>
+    <!-- 重新上传视频 -->
+  <div class="re-uploadVideo">
+    <el-upload action="" :show-file-list=false
+      v-if="isShowUploadVideo" :on-change="upload" :auto-upload="false">
+      <el-button type="primary" round class="el-icon-upload" size="mini">重新上传文件</el-button>
+    </el-upload>
+  </div>
     <!-- 确认采样 -->
     <div class="sampling" v-if="isShowUploadVideo">
       <div class="data1">视频进度条</div>
@@ -293,6 +300,9 @@
   video {
     width: 100%;
     height: 100%
+  }
+  .re-uploadVideo{
+    margin:10px 500px 10px 290px
   }
   .sampling {
     margin:10px 30px;
