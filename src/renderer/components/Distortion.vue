@@ -11,6 +11,7 @@
     </div>
     <!-- 畸变处理之后 -->
     <div class="show-area">
+      <img v-bind:src="returnPath"/>
     </div>
   </main>
   <!-- 重新上传图片 -->
@@ -25,11 +26,20 @@
     <!-- 畸变参数 -->
     <div class="parameter-area1">
       <div class="data1">畸变参数 k1</div>
-      <el-slider class="value1" show-input input-size="mini"
-        v-model="parameter1" @change="changeParameter()"></el-slider>
+      <el-slider class="value1" show-input :debounce=500 input-size="mini"
+        v-model="parameter1" :min=-1 :max=1 :step=0.01 @change="changeParameter()"></el-slider>
       <div class="data1">畸变参数 k2</div>
+      <el-slider class="value1" show-input :debounce=500 input-size="mini"
+        v-model="parameter2" :min=-1 :max=1 :step=0.01 @change="changeParameter()"></el-slider>
+    </div>
+    <!-- 畸变中心坐标 -->
+    <div class="parameter-area1">
+      <div class="data1">畸变中心坐标X</div>
       <el-slider class="value1" show-input input-size="mini"
-        v-model="parameter2" @change="changeParameter()"></el-slider>
+        v-model="valueX" :min=0 :max=1 :step=0.01 @change="changeParameter()"></el-slider>
+      <div class="data1">畸变中心坐标Y</div>
+      <el-slider class="value1" show-input input-size="mini"
+        v-model="valueY" :min=0 :max=1 :step=0.01 @change="changeParameter()"></el-slider>
     </div>
   </div>
 </div>
@@ -44,11 +54,15 @@ export default {
       // 畸变参数
       parameter1: 0,
       parameter2: 0,
+      valueX: 0,
+      valueY: 0,
       isShowUploadImg: false,
       // 文件路径
       filePath: '',
       // 本地文件路径
-      localPath: ''
+      localPath: '',
+      // 返回的图片路径
+      returnPath: ''
     }
   },
   methods: {
@@ -61,12 +75,27 @@ export default {
       this.changeParameter()
     },
     changeParameter () {
+      if (this.localPath === '') {
+        return
+      }
       ipcRenderer.send('transImgData', {
         filepath: this.localPath,
         K1: this.parameter1,
-        K2: this.parameter2
+        K2: this.parameter2,
+        CX: this.valueX,
+        CY: this.valueY
+      })
+    },
+    getReturnImg () {
+      ipcRenderer.on('returnImg', (e, m) => {
+        var file = new File([m], 'show.png', { type: 'image/png' })
+        let url = URL.createObjectURL(file)
+        this.returnPath = url
       })
     }
+  },
+  created () {
+    this.getReturnImg()
   }
 }
 </script>

@@ -18,9 +18,11 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Distortion',
-      // component: () => import('@/components/Distortion.vue')
-      component: require('@/components/Distortion').default
+      // 重定向，使路由命名具有唯一性，否则会出现Warning
+      redirect: '/distortion'
+      // name: 'Distortion',
+      // // component: () => import('@/components/Distortion.vue')
+      // component: require('@/components/Distortion').default
     },
     {
       path: '/distortion',

@@ -81,7 +81,7 @@ app.on('ready', () => {
  */
 
 var myConsole = new nodeConsole.Console(process.stdout, process.stderr)
-myConsole.log('asdsadasd')
+// myConsole.log('asdsadasd')
 ipcMain.on('on-upload-video', (e, f) => {
   myConsole.log(f)
 })
@@ -90,16 +90,6 @@ ipcMain.on('on-upload-video', (e, f) => {
 // })
 ipcMain.on('transVideoData', (e, f) => {
   myConsole.log(f)
-  execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', 'd:/penglai.jpg', '--ouput', './temp', '--cx', f.preData.valueX, '--cy', f.preData.valueY, '--k1', f.preData.parameter1, '--k2', f.preData.parameter2], (err, stdout, stderr) => {
-    if (err) {
-      myConsole.log(err)
-      return
-    }
-    myConsole.log(`stdout: ${stdout}`)
-  })
-})
-ipcMain.on('transImgData', (e, f) => {
-  myConsole.log(f)
   // execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', 'd:/penglai.jpg', '--ouput', './temp', '--cx', f.preData.valueX, '--cy', f.preData.valueY, '--k1', f.preData.parameter1, '--k2', f.preData.parameter2], (err, stdout, stderr) => {
   //   if (err) {
   //     myConsole.log(err)
@@ -107,6 +97,27 @@ ipcMain.on('transImgData', (e, f) => {
   //   }
   //   myConsole.log(`stdout: ${stdout}`)
   // })
+})
+ipcMain.on('transImgData', (e, f) => {
+  myConsole.log(f)
+  f.filepath = f.filepath.replace(/\\/g, '/')
+  myConsole.log(f.filepath)
+  let str = f.filepath.split('/')
+  myConsole.log(str)
+  let returnPath = process.cwd() + '/temp/' + str[str.length - 1]
+  execFile(process.cwd() + '\\distortion\\distortion_cpp.exe', ['--mode', 'simple', '--img', f.filepath, '--output', process.cwd() + '/temp', '--cx', f.CX, '--cy', f.CY, '--k1', f.K1, '--k2', f.K2], (err, stdout, stderr) => {
+    if (err) {
+      myConsole.log(err)
+      return
+    }
+    myConsole.log(`stdout: ${stdout}`)
+    fs.readFile(returnPath, (err, data) => {
+      if (err) {
+        myConsole.log(err)
+      }
+      mainWindow.webContents.send('returnImg', data)
+    })
+  })
 })
 
 // 检测文件或者文件夹存在 nodeJS

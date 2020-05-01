@@ -140,25 +140,35 @@
           endTemperature: 0,
           coolingRate: 0
         },
+
         // 预设下标
         preIndex: 0,
+
         // 预设名字输入
         preName: '',
+
         // 预设个数统计
         count: 0,
+
         // 是否显示预设弹窗
         saveDialogVisible: false,
         importDialogVisible: false,
+
         // 预设选择框数据列表
         preList: [],
+
         // 预设名字
         value: '',
+
         // 是否显示上传视频
         isShowUploadVideo: false,
+
         // 文件路径
         filePath: '',
+
         // 本地文件路径
         localPath: '',
+
         // 当前视频数据
         videoInfo: {
           duration: 0,
@@ -215,6 +225,7 @@
       },
       upload (file) {
         this.localPath = file.raw.path
+        console.log(file)
         ipcRenderer.send('on-upload-video', file.raw.path)
         this.isShowUploadVideo = true
         let url = URL.createObjectURL(file.raw)
@@ -287,6 +298,7 @@
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
+
   .show-area{
     width: 47%;
     height: 50vh;
@@ -297,22 +309,27 @@
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
+
   video {
     width: 100%;
     height: 100%
   }
+
   .re-uploadVideo{
     margin:10px 500px 10px 290px
   }
+
   .sampling {
     margin:10px 30px;
     display: flex;
     justify-content: flex-start;
   }
+
   .checkbtn{
     height: 28px;
     margin: 5px 45px;
   }
+
   .pre{
     margin:10px 60px;
     display: flex;
@@ -339,6 +356,7 @@
   .data2{
     margin: 0px 30px;
   }
+
   .value1 {
     width: 400px;
   }
@@ -357,11 +375,10 @@
     margin: 0px 30px;
   }
 
-
   .button-area{
     display: flex;
     justify-content: space-between;
     margin: 50px 280px;
   }
-  
+
 </style>
