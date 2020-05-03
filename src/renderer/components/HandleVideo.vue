@@ -12,6 +12,8 @@
       </div>
       <!-- 输出结果区域 -->
       <div class="show-area">
+         <img v-bind:src="returnPath" v-if="isShowImg"/>
+         <video v-bind:src="returnVideo" v-if="isShowVideo"></video>
       </div>
     </main>
     <!-- 重新上传视频 -->
@@ -42,28 +44,28 @@
       <div class="parameter-area1">
         <div class="data1">畸变参数 k1</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.parameter1"></el-slider>
+          :min=-1 :max=1 :step=0.01 v-model="currentData.parameter1"></el-slider>
         <div class="data1">畸变参数 k2</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.parameter2"></el-slider>
+          :min=-1 :max=1 :step=0.01 v-model="currentData.parameter2"></el-slider>
       </div>
       <!-- 畸变中心坐标 -->
       <div class="parameter-area1">
         <div class="data1">畸变中心坐标X</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.valueX"></el-slider>
+          :min=0 :max=1 :step=0.01 v-model="currentData.valueX"></el-slider>
         <div class="data1">畸变中心坐标Y</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.valueY"></el-slider>
+          :min=0 :max=1 :step=0.01 v-model="currentData.valueY"></el-slider>
       </div>
       <!-- 遗传变异交叉概率 -->
       <div class="parameter-area1">
         <div class="data1">遗传的变异概率</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.probability1"></el-slider>
+          :min=0 :max=1 :step=0.01 v-model="currentData.probability1"></el-slider>
         <div class="data1">遗传的交叉概率</div>
         <el-slider class="value1" show-input input-size="mini"
-          v-model="currentData.probability2"></el-slider>
+          :min=0 :max=1 :step=0.01 v-model="currentData.probability2"></el-slider>
       </div>
       <!-- 模拟退火算法优化 -->
       <div class="is-population-area">
@@ -77,17 +79,17 @@
         <div class="parameter-area2">
           <div class="data1">初始温度</div>
           <el-slider class="value2" show-input input-size="mini"
-            v-model="currentData.startTemperature"></el-slider>
+            :min=0 :max=6000 v-model="currentData.startTemperature"></el-slider>
         </div>
         <div class="parameter-area2">
           <div class="data1">终止温度</div>
           <el-slider class="value2" show-input input-size="mini"
-            v-model="currentData.endTemperature"></el-slider>
+            :min=0 :max=0.001 :step=0.0001  v-model="currentData.endTemperature"></el-slider>
         </div>
         <div class="parameter-area2">
           <div class="data1">降温速度</div>
           <el-slider class="value2" show-input input-size="mini"
-            v-model="currentData.coolingRate"></el-slider>
+            :min=0 :max=1 :step=0.01 v-model="currentData.coolingRate"></el-slider>
         </div>
       </div>
     </div>
@@ -129,16 +131,16 @@
       return {
         // 当前参数
         currentData: {
-          parameter1: 0,
-          parameter2: 0,
-          valueX: 0,
-          valueY: 0,
-          probability1: 0,
-          probability2: 0,
+          parameter1: 0.3,
+          parameter2: 0.02,
+          valueX: 0.5,
+          valueY: 0.5,
+          probability1: 0.65,
+          probability2: 0.08,
           isPopulation: false,
-          startTemperature: 0,
-          endTemperature: 0,
-          coolingRate: 0
+          startTemperature: 3000,
+          endTemperature: 0.00000001,
+          coolingRate: 0.98
         },
 
         // 预设下标
@@ -176,7 +178,9 @@
           precent: 0
         },
         // 采样时间点百分比
-        sampleTimePoint: 0
+        sampleTimePoint: 0,
+        isShowImg: false,
+        isShowVideo: false
       }
     },
     methods: {
