@@ -6,7 +6,6 @@
       <canvas id="srcCanvas" width="500px" height="500px"></canvas>
     </div>
     <div class="upload-area" v-if="!isShowRed">
-      <!-- <canvas id="srcCanvas" class="upload-area" v-if="isShowRed"></canvas> -->
       <img id="uploadImg" v-bind:src="filePath" v-if="isShowUploadImg"/>
       <el-upload action="" 
         v-if="!isShowUploadImg" :on-change="upload" :auto-upload="false">
@@ -25,12 +24,12 @@
       <el-button type="primary" round class="el-icon-upload" size="mini">重新上传图片</el-button>
     </el-upload>
   </div>
-  <div class="is-population-area">
-    <div class="data2">对比</div>
-      <el-switch class="is-population-data" 
+  <div class="is-area">
+    <el-switch class="is-population-data" 
         active-color="#409eff" inactive-color="#dcdfe6"
+        active-text="对比"
         v-model="isShowRed"></el-switch>
-    </div>
+  </div>
   <!-- 参数区域 -->
   <div class="input-data">
     <!-- 畸变参数 -->
@@ -64,22 +63,30 @@ export default {
       // 畸变参数
       parameter1: 0,
       parameter2: 0,
+
+      // 畸变中心坐标
       valueX: 0,
       valueY: 0,
+
+      // 是否显示上传的图片
       isShowUploadImg: false,
+
       // 文件路径
       filePath: '',
+
       // 本地文件路径
       localPath: '',
+
       // 返回的图片路径
       returnPath: '',
+
+      // 是否显示对比标红
       isShowRed: false
     }
   },
   methods: {
     upload (file) {
       this.localPath = file.raw.path
-      // ipcRenderer.send('on-upload-img', file.raw.path)
       this.isShowUploadImg = true
       let url = URL.createObjectURL(file.raw)
       this.filePath = url
@@ -90,19 +97,16 @@ export default {
         return
       }
       ipcRenderer.send('transImgData', {
-        filepath: this.localPath,
+        filePath: this.localPath,
         K1: this.parameter1,
         K2: this.parameter2,
         CX: this.valueX,
         CY: this.valueY
       })
-      // this.getSrcImgData()
-      // this.getAeImgData()
     },
     getReturnImg () {
       ipcRenderer.on('returnImg', (e, m) => {
         var file = new File([m], 'show.png', { type: 'image/png' })
-        // console.log(file)
         let url = URL.createObjectURL(file)
         this.returnPath = url
         this.drawRed(url)
@@ -113,34 +117,16 @@ export default {
       let srcImg = new Image()
       srcImg.src = this.filePath
       let srcCanvas = document.getElementById('srcCanvas')
-      console.log('111')
-      console.log(srcCanvas)
       if (srcCanvas === null) {
         return
       }
       let srcContext = srcCanvas.getContext('2d')
-      // let maxw = 575
-      // let maxh = 330
-      // let scale = 1
-      // if (srcImg.width > maxw || srcImg.height > maxh) {
-      //   scale = maxh / srcImg.height
-      //   if (srcImg.width > srcImg.height) {
-      //     scale = maxw / srcImg.width
-      //   }
-      // }
-      // srcImg.width = srcImg.width * scale
-      // srcImg.height = srcImg.height * scale
-      // console.log(srcImg.height)
       srcImg.onload = function () {
         srcCanvas.width = srcImg.naturalWidth
         srcCanvas.height = srcImg.naturalHeight
-        console.log(srcImg)
         srcContext.drawImage(srcImg, 0, 0, srcImg.naturalWidth, srcImg.naturalHeight)
         srcImgData = srcContext.getImageData(0, 0, srcImg.naturalWidth, srcImg.naturalHeight)
-        console.log('srcImgData')
-        console.log(srcImgData)
         let aeImg = new Image()
-        console.log(path)
         aeImg.src = path
         let aeCanvas = document.createElement('canvas')
         let aeContext = aeCanvas.getContext('2d')
@@ -149,21 +135,14 @@ export default {
           aeCanvas.height = aeImg.naturalHeight
           aeContext.drawImage(aeImg, 0, 0, aeImg.naturalWidth, aeImg.naturalHeight)
           aeImgData = aeContext.getImageData(0, 0, aeImg.naturalWidth, aeImg.naturalHeight)
-          console.log('aeImgData')
-          console.log(aeImgData)
           let r, g, b
-          // console.log(srcImgData.data)
           for (let index = 0; index < srcImgData.data.length; index += 4) {
             r = Math.abs(srcImgData.data[index] - aeImgData.data[index])
             g = Math.abs(srcImgData.data[index + 1] - aeImgData.data[index + 1])
             b = Math.abs(srcImgData.data[index + 2] - aeImgData.data[index + 2])
             srcImgData.data[index] = srcImgData.data[index] + r + g + b
-            // srcImgData.data[index + 1] = 0
-            // srcImgData.data[index + 2] = 0
-            // srcImgData.data[index + 3] = 255
           }
           srcContext.putImageData(srcImgData, 0, 0)
-          console.log(srcImgData)
         }
       }
     }
@@ -208,19 +187,20 @@ export default {
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
+
   canvas {
     position: relative;
     top: 0px;
     left: 0px;
   }
+
   img{
     width: auto;
 	  height: auto;
 	  max-width: 100%;
 	  max-height: 100%;
-    /* display: inline-block; 
-    vertical-align: middle; */
   }
+
   .show-area{
     width: 47%;
     height: 50vh;
@@ -231,21 +211,32 @@ export default {
     background: linear-gradient(white,white) padding-box,
     repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
   }
+
   .re-uploadImg{
     margin:10px 500px 10px 290px
   }
+
   .parameter-area1 {
     margin: 10px 30px;
     display: flex;
     justify-content: flex-start;
   }
+
   .data1 {
     margin: 0px 30px;
     line-height: 38px;
   }
+
   .value1 {
     width: 400px;
   }
+
+  .is-area{
+    margin: 20px 60px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
   #srcCanvas {
     width: auto;
 	  height: auto;
@@ -253,5 +244,3 @@ export default {
 	  max-height: 100%;
   }
 </style>
-
-
