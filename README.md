@@ -43,7 +43,7 @@ npm run lint
 ## 难点
 
 ### 1.如何实现两张图像的对比图
-####解决方案:
+#### 解决方案:
 - 利用 `canvas` 自带的 `Web API`--`getimagedata()` 获取图片的像素数据
 - 将两张图像的像素数据相减的绝对值添加到原图像素数据的 `R` 通道
 - 利用 `canvas` 自带的 `Web API`--`putimagedata()` 将新数据画入 `canvas`
