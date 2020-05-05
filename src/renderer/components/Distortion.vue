@@ -26,9 +26,8 @@
   </div>
   <div class="is-area">
     <el-switch class="is-population-data" 
-        active-color="#409eff" inactive-color="#dcdfe6"
-        active-text="对比"
-        v-model="isShowRed"></el-switch>
+        active-color="#409eff" inactive-color="#dcdfe6" active-text="对比"
+        v-model="isShowRed" @change="changeParameter()"></el-switch>
   </div>
   <!-- 参数区域 -->
   <div class="input-data">

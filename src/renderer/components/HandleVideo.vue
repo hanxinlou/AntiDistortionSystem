@@ -10,7 +10,7 @@
         <div class="upload-area" v-if="!isShowImg">
           <video id="uploadVideo" controls="controls" 
             v-bind:src="filePath" v-if="isShowUploadVideo"
-            @timeupdate="handleTimeUpdate"></video>
+            @timeupdate="handleTimeUpdate"></video>//
           <el-upload action="" 
             v-if="!isShowUploadVideo" :on-change="upload" :auto-upload="false">
             <el-button type="primary" round icon="el-icon-upload">点击上传文件</el-button>
@@ -32,9 +32,8 @@
   </div>
   <div class="is-genetic" v-if="isShowUploadVideo">
     <el-switch class="is-area2" 
-        active-color="#409eff" inactive-color="#dcdfe6"
-        active-text="对比"
-        v-model="isShowRed"></el-switch>
+        active-color="#409eff" inactive-color="#dcdfe6" active-text="对比"
+        v-model="isShowRed" @change="transSampleData()"></el-switch>
   </div>
     <!-- 参数区域 -->
     <div class="input-data">
