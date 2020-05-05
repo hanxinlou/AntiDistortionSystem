@@ -2,15 +2,28 @@
   <div id="handleVideo"> 
     <main>
       <!-- 上传区域 -->
-      <div class="upload-area" v-if="isShowRed">
-        <canvas id="srcCanvas" width="500px" height="500px"></canvas>
+      <!-- 显示图片 -->
+      <div class="upload-area" v-if="isShowImg">
+        <!-- 不显示对比 -->
+        <img v-bind:src="returnSrcPath" v-if="!isShowImgRed"/>
+        <!-- 显示对比 -->
+        <canvas id="srcCanvas" width="500px" height="500px" v-if="isShowImgRed"></canvas>
       </div>
-      <div v-if="!isShowRed">
-        <img v-bind:src="returnSrcPath" v-if="isShowImg"/>
-        <div class="upload-area" v-if="!isShowImg">
-          <video id="uploadVideo" controls="controls" 
-            v-bind:src="filePath" v-if="isShowUploadVideo"
-            @timeupdate="handleTimeUpdate"></video>//
+      <!-- 显示视频 -->
+      <div class="upload-area" v-if="!isShowImg">
+        <!-- 显示对比 -->
+        <video id="cmpVideo" controls="controls"
+          v-bind:src="returnCmpVideo" v-if="isShowVideoRed"
+          @timeupdate="handleVideopro"></video>
+        <!-- 不显示对比 -->
+        <div v-if="!isShowVideoRed">
+          <!-- 显示上传视频 -->
+          <div v-if="isShowUploadVideo" > 
+            <video id="uploadVideo" controls="controls" 
+              v-bind:src="filePath" v-if="!isShowImg"
+              @timeupdate="handleTimeUpdate"></video>
+          </div>
+          <!-- 不显示上传视频 -->
           <el-upload action="" 
             v-if="!isShowUploadVideo" :on-change="upload" :auto-upload="false">
             <el-button type="primary" round icon="el-icon-upload">点击上传文件</el-button>
@@ -19,22 +32,40 @@
       </div>
       <!-- 输出结果区域 -->
       <div class="show-area">
-         <img v-bind:src="returnAePath" v-if="isShowImg"/>
-         <video v-bind:src="returnVideo" v-if="isShowVideo"></video>
+        <!-- 显示图片 -->
+        <img v-bind:src="returnAePath" v-if="isShowImg"/>
+        <!-- 显示视频 -->
+        <video id="aeVideo" controls="controls"
+          v-bind:src="returnAeVideo" v-if="!isShowImg"></video>
       </div>
     </main>
     <!-- 重新上传视频 -->
-  <div class="re-uploadVideo">
-    <el-upload action="" :show-file-list=false
-      v-if="isShowUploadVideo" :on-change="upload" :auto-upload="false">
-      <el-button type="primary" round icon="el-icon-upload" size="mini">重新上传文件</el-button>
-    </el-upload>
-  </div>
-  <div class="is-genetic" v-if="isShowUploadVideo">
-    <el-switch class="is-area2" 
-        active-color="#409eff" inactive-color="#dcdfe6" active-text="对比"
-        v-model="isShowRed" @change="transSampleData()"></el-switch>
-  </div>
+    <div class="re-uploadVideo">
+      <el-upload action="" :show-file-list=false
+        v-if="isShowUploadVideo" :on-change="upload" :auto-upload="false">
+        <el-button type="primary" round icon="el-icon-upload" size="mini">重新上传文件</el-button>
+      </el-upload>
+    </div>
+    <!-- 标签区域 -->
+    <div class="label" v-if="isShowImg">
+      <el-tag v-if="!isShowImgRed">采样图像</el-tag>
+      <el-tag v-if="isShowImgRed">采样对比</el-tag>
+      <el-tag>采样矫正过程</el-tag>
+    </div>
+    <div class="label" v-if="!isShowImg">
+      <el-tag v-if="!isShowVideoRed">原视频</el-tag>
+      <el-tag v-if="isShowVideoRed">矫正视频对比</el-tag>
+      <el-tag>矫正视频</el-tag>
+    </div>
+    <!-- 是否启用对比 -->
+    <div class="is-genetic2">
+      <el-switch 
+        active-color="#409eff" inactive-color="#dcdfe6" active-text="采样对比"
+        v-model="isShowImgRed" @change="switchChange()"></el-switch>
+      <el-switch style="margin-left: 20px"
+        active-color="#409eff" inactive-color="#dcdfe6" active-text="视频对比"
+        v-model="isShowVideoRed" @change="switchChange()"></el-switch>
+    </div>
     <!-- 参数区域 -->
     <div class="input-data">
       <!-- 预设按钮 -->
@@ -80,6 +111,7 @@
           <el-slider class="value1" show-input input-size="mini"
             :min=0 :max=1 :step=0.01 v-model="currentData.genProC"></el-slider>
         </div>
+        <!-- 遗传种群代数参数 -->
         <div class="parameter-area2">
           <div class="data1">种群大小</div>
           <el-slider class="value2" show-input input-size="mini"
@@ -132,11 +164,12 @@
     <!-- 开始停止按钮 -->
     <div class="button-area">
       <!-- 确认采样 -->
-      <el-button type="primary" round size="medium"
+      <el-button type="primary" round icon="el-icon-check" size="medium"
         @click="transSampleData()">确认采样</el-button>
       <el-button type="primary" round icon="el-icon-video-play" size="medium" 
-        @click="transVideoData()">开始</el-button>
-      <el-button type="primary" round icon="el-icon-video-pause" size="medium" >停止</el-button>
+        @click="transVideoData()">开始处理</el-button>
+      <el-button type="primary" round icon="el-icon-video-pause" size="medium" 
+        @click="stop()">停止处理</el-button>
     </div>
     <!-- 保存预设弹窗 -->
     <el-dialog title="保存预设" width="30%" 
@@ -169,22 +202,39 @@
     name: 'HandleVideo',
     data () {
       return {
+
         // 当前参数
         currentData: {
+
+          // 畸变参数k1,k2
           parameter1: 0.3,
           parameter2: 0.02,
+
+          // 畸变中心cx,cy
           valueX: 0.5,
           valueY: 0.5,
+
+          // 是否启用遗传算法
+          isGenetic: false,
+
+          // 变异概率,交叉概率
           genProM: 0.65,
           genProC: 0.08,
-          isGenetic: false,
+
+          // 遗传算法参数
           genPopulation: 50,
           genGenerate: 40,
+
+          // 是否启用模拟退火算法
           isAnnealing: false,
+
+          // 退火算法参数
           startTemperature: 3000,
           endTemperature: 0.00000001,
           coolingRate: 0.98,
-          evoPopulation: 100,
+
+          // 演化策略参数
+          evoPopulation: 40,
           evoGenerate: 40
         },
 
@@ -223,21 +273,28 @@
           precent: 0
         },
 
+        // 畸变视频数据
+        aeVideoInfo: {
+          duration: 0,
+          currentTime: 0
+        },
+
         // 采样时间点百分比
         sampleTimePoint: 0,
 
         // 返回的图片或者视频url
         returnSrcPath: '',
         returnAePath: '',
-        returnVideo: '',
+        aeOnloadPath: '',
+        returnAeVideo: '',
+        returnCmpVideo: '',
+
         // 是否显示处理完的样本图片
         isShowImg: false,
 
-        // 是否显示处理完的视频
-        isShowVideo: false,
-
         // 是否显示对比
-        isShowRed: false
+        isShowImgRed: false,
+        isShowVideoRed: false
       }
     },
     methods: {
@@ -251,6 +308,7 @@
           })
           .catch(_ => {})
       },
+      // 加载预设列表
       loadpreList () {
         let myStorage = window.localStorage
         let getList = JSON.parse(myStorage.getItem('preList'))
@@ -284,12 +342,26 @@
         }
         this.importDialogVisible = false
       },
+      // 控制对比启用开关
+      switchChange () {
+        if (this.isShowVideoRed === true) {
+          this.isShowImgRed = false
+        }
+        if (this.isShowImgRed === true) {
+          this.isShowVideoRed = false
+        }
+      },
+      // 上传文件
       upload (file) {
         this.localPath = file.raw.path
         ipcRenderer.send('on-upload-video', file.raw.path)
         this.isShowUploadVideo = true
         let url = URL.createObjectURL(file.raw)
         this.filePath = url
+        this.isShowImg = false
+        this.isShowImgRed = false
+        this.isShowVideoRed = false
+        console.log(this.isShowImg)
         let t = setInterval(() => {
           let uploadVideo = document.getElementById('uploadVideo')
           if (uploadVideo != null) {
@@ -304,13 +376,27 @@
         let uploadVideo = document.getElementById('uploadVideo')
         this.sampleTimePoint = uploadVideo.currentTime / uploadVideo.duration
       },
+      // 左右视频同步 较为卡顿还需优化
+      handleVideopro () {
+        let myVideo = document.getElementById('cmpVideo')
+        // this.aeVideoInfo.duration = myVideo.duration
+        // this.aeVideoInfo.currentTime = myVideo.currentTime
+        console.log(myVideo.duration)
+        console.log(myVideo.currentTime)
+        let myVideo2 = document.getElementById('aeVideo')
+        myVideo2.currentTime = myVideo.currentTime
+        console.log(myVideo2.currentTime)
+      },
+      // 确认采样后调用 向主进程发送信息 调用矫正算法
       transSampleData () {
+        this.isShowImg = false
         ipcRenderer.send('transSampleData', {
           filePath: this.localPath,
           sampleTimePoint: this.sampleTimePoint,
           preData: this.currentData
         })
       },
+      // 开始处理后调用 向主进程发送信息 获取矫正视频,对比视频
       transVideoData () {
         ipcRenderer.send('transVideoData', {
           filePath: this.localPath,
@@ -318,30 +404,30 @@
           preData: this.currentData
         })
       },
+      // 获得矫正图像 监听主进程发送的信息
       getReturnSample () {
         ipcRenderer.on('returnSrcPath', (e, m) => {
           let file = new File([m], 'show.png', { type: 'image/png' })
           let url = URL.createObjectURL(file)
           this.returnSrcPath = url
-          this.isShowImg = true
         })
         ipcRenderer.on('returnAePath', (e, m) => {
           let file = new File([m], 'show.png', { type: 'image/png' })
           let url = URL.createObjectURL(file)
           this.returnAePath = url
           this.isShowImg = true
-          this.drawRed(url)
+          this.drawRed()
         })
       },
-      drawRed (path) {
-        console.log('drawRed')
+      // 对比标红算法 利用 canvas 的 api 获取两张图片的像素数据
+      // 两张图片的像素相减的绝对值附加到原图像素数据的 R 通道 实现标红
+      drawRed () {
+        let url = this.returnAePath
         let srcImgData, aeImgData
         let srcImg = new Image()
-        console.log(this.returnSrcPath)
         srcImg.src = this.returnSrcPath
         let srcCanvas = document.getElementById('srcCanvas')
         if (srcCanvas === null) {
-          console.log('srcCanvas === null')
           return
         }
         let srcContext = srcCanvas.getContext('2d')
@@ -351,7 +437,7 @@
           srcContext.drawImage(srcImg, 0, 0, srcImg.naturalWidth, srcImg.naturalHeight)
           srcImgData = srcContext.getImageData(0, 0, srcImg.naturalWidth, srcImg.naturalHeight)
           let aeImg = new Image()
-          aeImg.src = path
+          aeImg.src = url
           let aeCanvas = document.createElement('canvas')
           let aeContext = aeCanvas.getContext('2d')
           aeImg.onload = function () {
@@ -370,16 +456,31 @@
           }
         }
       },
+      // 获得矫正视频,对比视频 监听主进程发送的信息
       getReturnVideo () {
-        ipcRenderer.on('returnVideo', (e, m) => {
-        // var file = new File([m], 'show.png', { type: 'image/png' })
-        // let url = URL.createObjectURL(file)
-        // this.returnPath = url
-        // this.drawRed(url)
-        // console.log(m)
+        ipcRenderer.on('returnAeVideo', (e, m) => {
+          let file = new File([m], 'show.mp4', { type: 'video/mp4' })
+          let url = URL.createObjectURL(file)
+          this.returnAeVideo = url
+          console.log(m)
+          console.log(file)
+          this.isShowImg = false
         })
+        ipcRenderer.on('returnCmpVideo', (e, m) => {
+          let file = new File([m], 'showcmp.mp4', { type: 'video/mp4' })
+          let url = URL.createObjectURL(file)
+          this.returnCmpVideo = url
+          console.log(m)
+          console.log(file)
+          this.isShowImg = false
+        })
+      },
+      // 停止矫正调用 向主进程发送信息 调用停止算法
+      stop () {
+        ipcRenderer.send('stop', 'stop the project')
       }
     },
+    // 程序初始化时调用
     created () {
       this.loadpreList()
       this.getReturnSample()
@@ -418,9 +519,10 @@
     height: 50vh;
     line-height: 50vh;
     text-align: center;
-    border: 5px dashed transparent;
-    background: linear-gradient(white,white) padding-box,
-    repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
+    border: 2px solid;
+    border-color: #409eff;
+    /* background: linear-gradient(white,white) padding-box,
+    repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em); */
   }
 
   .show-area{
@@ -428,10 +530,11 @@
     height: 50vh;
     line-height: 50vh;
     text-align: center;
-    border: 5px dashed transparent;
+    border: 2px solid;
+    border-color: #409eff;
     border-left-width: 0;
-    background: linear-gradient(white,white) padding-box,
-    repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em);
+    /* background: linear-gradient(white,white) padding-box,
+    repeating-linear-gradient(-45deg,#409eff 0, #409eff 0.25em,white 0,white 0.75em); */
   }
 
   video {
@@ -446,7 +549,8 @@
   }
 
   .re-uploadVideo{
-    margin:10px 350px 10px 290px
+    margin: auto;
+    text-align: center;
   }
 
   .sampling {
@@ -498,6 +602,12 @@
 
   .is-genetic{
     margin: 20px 0px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .is-genetic2 {
+    margin: 20px 60px;
     display: flex;
     justify-content: flex-start;
   }
