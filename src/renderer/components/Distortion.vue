@@ -296,14 +296,14 @@ export default {
     },
     // 开始处理调用 向主进程发送信息 调用矫正算法
     correctImg () {
-      let str = this.localPath.split('\\')
-      let p = process.cwd() + '/tempimg/' + str[str.length - 1]
+      // let str = this.localPath.split('\\')
+      // let p = process.cwd() + '/tempimg/' + str[str.length - 1]
       this.isCorrect = true
-      if (this.returnPath === '') {
-        return
-      }
+      // if (this.returnPath === '') {
+      // return
+      // }
       ipcRenderer.send('transAeData', {
-        filePath: p,
+        filePath: this.localPath,
         preData: this.currentData
       })
     },
