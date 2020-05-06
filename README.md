@@ -75,11 +75,15 @@ npm run lint
 ### 6.如何存储预设数据(下次启动客户端 数据仍存在)
 #### 解决方案:
 - 采用 `windows` 自带的 `localStorge` 字典存储 键值一一对应
+- localStorage是html5提供的一种本地存储的方法，可以把数据存储在本地浏览器，下次打开后仍然可以获取到存储的数据，如果在存储的数据 量小的时候可以起到代替数据库的功能，比cookies更有优越性。
+- localStorage只能存储字符串的数据，对于JS中常用的数组或对象却不能直接存储
+- 可以通过JSON对象提供的parse和stringify进行对象和字符串的转换，进行数据存取
+- 加载数据是先判断获取的数据是否为空 浏览器过一段时间会定时清除
 ```js
   // 存储数据
-  window.localStorage.setItem('preList', preListToJson)
+  window.localStorage.setItem('name', data)
   // 读取数据
-  window.localStorage.getItem('preList')
+  window.localStorage.getItem('name')
 ```
 ## 待优化
 - [ ] 图片加载过慢 `img` 标签读取图片像素数据的方式 或许可以用 `canvas` 标签
