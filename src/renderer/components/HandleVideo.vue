@@ -14,7 +14,7 @@
         <!-- 显示对比 -->
         <video id="cmpVideo" controls="controls"
           v-bind:src="returnCmpVideo" v-if="isShowVideoRed"
-          @timeupdate="handleVideopro"></video>
+          @timeupdate="handleVideopro('cmpVideo')"></video>
         <!-- 不显示对比 -->
         <div v-if="!isShowVideoRed">
           <!-- 显示上传视频 -->
@@ -39,13 +39,6 @@
           v-bind:src="returnAeVideo" v-if="!isShowImg"></video>
       </div>
     </main>
-    <!-- 重新上传视频 -->
-    <div class="re-uploadVideo">
-      <el-upload action="" :show-file-list=false
-        v-if="isShowUploadVideo" :on-change="upload" :auto-upload="false">
-        <el-button type="primary" round icon="el-icon-upload" size="mini">重新上传文件</el-button>
-      </el-upload>
-    </div>
     <!-- 标签区域 -->
     <div class="label" v-if="isShowImg">
       <el-tag v-if="!isShowImgRed">采样图像</el-tag>
@@ -56,6 +49,13 @@
       <el-tag v-if="!isShowVideoRed">原视频</el-tag>
       <el-tag v-if="isShowVideoRed">矫正视频对比</el-tag>
       <el-tag>矫正视频</el-tag>
+    </div>
+    <!-- 重新上传视频 -->
+    <div class="re-uploadVideo">
+      <el-upload action="" :show-file-list=false
+        v-if="isShowUploadVideo" :on-change="upload" :auto-upload="false">
+        <el-button type="primary" round icon="el-icon-upload" size="mini">重新上传文件</el-button>
+      </el-upload>
     </div>
     <!-- 是否启用对比 -->
     <div class="is-genetic2">
@@ -197,7 +197,8 @@
 </template>
 
 <script>
-  import {ipcRenderer} from 'electron'
+  import { ipcRenderer } from 'electron'
+  // import { Loading } from 'element-ui'
   export default {
     name: 'HandleVideo',
     data () {
@@ -294,7 +295,11 @@
 
         // 是否显示对比
         isShowImgRed: false,
-        isShowVideoRed: false
+        isShowVideoRed: false,
+
+        canPlay: false
+        // clockNum: null,
+        // loadingInstance: null
       }
     },
     methods: {
@@ -312,7 +317,9 @@
       loadpreList () {
         let myStorage = window.localStorage
         let getList = JSON.parse(myStorage.getItem('preList'))
-        this.preList = getList
+        if (getList != null) {
+          this.preList = getList
+        }
         if (myStorage.getItem('count') != null) {
           this.count = myStorage.getItem('count')
         }
@@ -375,14 +382,16 @@
       handleTimeUpdate () {
         let uploadVideo = document.getElementById('uploadVideo')
         this.sampleTimePoint = uploadVideo.currentTime / uploadVideo.duration
+        console.log(this.canPlay)
+        if (this.canPlay === true) {
+          this.handleVideopro('uploadVideo')
+        }
       },
       // 左右视频同步 较为卡顿还需优化
-      handleVideopro () {
-        let myVideo = document.getElementById('cmpVideo')
+      handleVideopro (videoID) {
+        let myVideo = document.getElementById(videoID)
         // this.aeVideoInfo.duration = myVideo.duration
         // this.aeVideoInfo.currentTime = myVideo.currentTime
-        console.log(myVideo.duration)
-        console.log(myVideo.currentTime)
         let myVideo2 = document.getElementById('aeVideo')
         myVideo2.currentTime = myVideo.currentTime
         console.log(myVideo2.currentTime)
@@ -403,6 +412,10 @@
           sampleTimePoint: this.sampleTimePoint,
           preData: this.currentData
         })
+        // let t = setInterval(() => {
+        //   let myAeVideo = document.getElementById('aeVideo')
+        //     if (myAeVideo.)
+        // }, 500)
       },
       // 获得矫正图像 监听主进程发送的信息
       getReturnSample () {
@@ -465,6 +478,10 @@
           console.log(m)
           console.log(file)
           this.isShowImg = false
+          this.canPlay = true
+          // this.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+          //   this.loadingInstance.close()
+          // })
         })
         ipcRenderer.on('returnCmpVideo', (e, m) => {
           let file = new File([m], 'showcmp.mp4', { type: 'video/mp4' })
@@ -473,8 +490,23 @@
           console.log(m)
           console.log(file)
           this.isShowImg = false
+          // this.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+          //   this.loadingInstance.close()
+          // })
+          clearInterval(this.clockNum)
         })
       },
+      // 获取返回视频是否存在
+      // getReturnVideoStatus () {
+      //   ipcRenderer.on('AeVideofalse', (e, m) => {
+      //     let myAeVideo = document.getElementById('aeVideo')
+      //     this.loadingInstance = Loading.service(myAeVideo)
+      //   })
+      //   ipcRenderer.on('CmpVideofalse', (e, m) => {
+      //     let myCmpVideo = document.getElementById('cmpVideo')
+      //     this.loadingInstance = Loading.service(myCmpVideo)
+      //   })
+      // },
       // 停止矫正调用 向主进程发送信息 调用停止算法
       stop () {
         ipcRenderer.send('stop', 'stop the project')
@@ -538,8 +570,10 @@
   }
 
   video {
-    width: 100%;
-    height: 100%
+    /* width: 400px; */
+	  height: 320px;
+	  max-width: 100%;
+	  max-height: 100%;
   }
 
   canvas {

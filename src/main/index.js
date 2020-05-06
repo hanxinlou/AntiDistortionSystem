@@ -222,6 +222,7 @@ ipcMain.on('transVideoData', (e, f) => {
   fs.readFile(CmpVideo, (err, data) => {
     if (err) {
       myConsole.log(err)
+      // mainWindow.webContents.send('CmpVideofalse', data)
       return
     }
     mainWindow.webContents.send('returnCmpVideo', data)
@@ -230,6 +231,7 @@ ipcMain.on('transVideoData', (e, f) => {
   fs.readFile(AeVideo, (err, data) => {
     if (err) {
       myConsole.log(err)
+      // mainWindow.webContents.send('AeVideofalse', data)
       return
     }
     mainWindow.webContents.send('returnAeVideo', data)
