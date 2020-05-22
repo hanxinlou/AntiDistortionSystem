@@ -27,7 +27,8 @@ npm run lint
 > 用于研究VR设备中存在的图像畸变和畸变校正算法,可展示畸变矫正算法的效果
 
 ## 技术选型
-- Electron-Vue
+- Electron
+- Vue.js
 - Node.js
 
 ## 功能(算法效果可视化)
