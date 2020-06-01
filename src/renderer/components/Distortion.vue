@@ -42,8 +42,28 @@
   </main>
   <!-- 标签区域 -->
   <div class="label" v-if="isCorrect">
-    <el-tag v-if="isShowRed">反畸变对比图</el-tag>
+    <el-tag v-if="isShowRed">与畸变图像对比</el-tag>
     <el-tag v-if="!isShowRed">畸变图像</el-tag>
+    <el-tag>矫正图像</el-tag>
+  </div>
+  <main v-if="isCorrect">
+    <!-- 显示反畸变对比 -->
+    <div class="upload-area" v-if="isShowAntiRed">
+      <canvas id="srcCanvas3" width="500px" height="500px"></canvas>
+    </div>
+    <!-- 不显示反畸变对比 -->
+    <div class="upload-area" v-if="!isShowAntiRed">
+      <img v-bind:src="filePath"/>
+    </div>
+    <!-- 反畸变处理之后 -->
+    <div class="show-area">
+        <img v-bind:src="returnCorrectPath"/>
+    </div>
+  </main>
+  <!-- 标签区域 -->
+  <div class="label" v-if="isCorrect">
+    <el-tag v-if="isShowRed">与原图对比</el-tag>
+    <el-tag v-if="!isShowRed">原图像</el-tag>
     <el-tag>矫正图像</el-tag>
   </div>
   <!-- 重新上传图片 -->
@@ -315,6 +335,7 @@ export default {
         this.returnCorrectPath = url
         this.isShowImg = true
         this.drawRed(this.returnPath, url, 'srcCanvas2')
+        this.drawRed(this.filePath, url, 'srcCanvas3')
       })
     },
     // 停止矫正调用 向主进程发送信息 调用停止算法
@@ -430,6 +451,13 @@ export default {
   }
 
   #srcCanvas2 {
+    width: auto;
+	  height: auto;
+	  max-width: 100%;
+	  max-height: 100%;
+  }
+
+  #srcCanvas3 {
     width: auto;
 	  height: auto;
 	  max-width: 100%;
